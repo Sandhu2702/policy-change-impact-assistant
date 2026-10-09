@@ -1,0 +1,9 @@
+Policy: Travel Reimbursement Policy
+Version: v1
+Effective Date: 2025-01-01
+
+1. Meal Reimbursement
+Employees traveling for business may claim meal expenses up to $40 per day.
+
+2. Receipt Requirement
+Receipts are required for all reimbursement claims.

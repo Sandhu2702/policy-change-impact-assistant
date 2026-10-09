@@ -1,0 +1,12 @@
+Policy: Annual Leave Policy
+Version: v2
+Effective Date: 2026-01-01
+
+1. Annual Leave Entitlement
+Full-time employees are entitled to 24 days of annual leave per calendar year.
+
+2. Leave Approval
+Employees must obtain manager approval before taking annual leave.
+
+3. Leave Carryover
+Employees may carry over up to 5 unused annual leave days into the next calendar year.

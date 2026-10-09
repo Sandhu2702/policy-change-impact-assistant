@@ -1,0 +1,12 @@
+Policy: Work From Home Policy
+Version: v2
+Effective Date: 2026-01-01
+
+1. Remote Work Eligibility
+Employees may work from home up to 3 days per week with manager approval.
+
+2. Availability
+Employees must be available during their team's core working hours.
+
+3. Equipment
+Employees may request company-provided equipment for remote work.

@@ -1,0 +1,18 @@
+Policy: Confidential Data Sharing Policy
+Version: v2
+Effective Date: 2026-01-01
+
+1. Confidential Information
+Employees must protect confidential company information, including customer data, financial records, business plans, internal documents, and source code.
+
+2. External Sharing
+Employees must not share confidential information with external parties unless they have prior written approval from an authorized manager and the recipient is authorized to access the information.
+
+3. Personal Accounts
+Employees must not use personal email accounts or unauthorized file-sharing services to transfer confidential company information.
+
+4. AI Tools and Public Platforms
+Employees must not upload confidential company information to public AI tools or unapproved external platforms.
+
+5. Security Incidents
+Employees must promptly report suspected unauthorized disclosure of confidential information to the company's designated security team.

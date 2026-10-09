@@ -1,0 +1,9 @@
+Policy: Annual Leave Policy
+Version: v1
+Effective Date: 2025-01-01
+
+1. Annual Leave Entitlement
+Full-time employees are entitled to 20 days of annual leave per calendar year.
+
+2. Leave Approval
+Employees must obtain manager approval before taking annual leave.
