@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from app.database.operations import get_policy_changes
 from app.services.policy_service import process_policy_versions
+from app.services.qa_service import answer_policy_question
+
 
 app = FastAPI(
     title="Policy Change Impact Assistant",
@@ -61,3 +63,11 @@ def compare_policy_versions(
         "count": len(changes),
         "changes": changes,
     }
+
+
+@app.get("/policies/{policy_name}/ask")
+def ask_policy_question(
+    policy_name: str,
+):
+    """Answer a question using saved policy changes."""
+    return answer_policy_question(policy_name)
