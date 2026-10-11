@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from app.database.operations import get_policy_changes
+from app.services.policy_service import process_policy_versions
 
 app = FastAPI(
     title="Policy Change Impact Assistant",
@@ -30,6 +31,33 @@ def get_changes(
 
     return {
         "policy_name": policy_name,
+        "count": len(changes),
+        "changes": changes,
+    }
+
+
+@app.post("/policies/{policy_name}/compare")
+def compare_policy_versions(
+    policy_name: str,
+    old_version: str,
+    new_version: str,
+    old_file_path: str,
+    new_file_path: str,
+):
+    """Compare two policy versions and save their changes."""
+
+    changes = process_policy_versions(
+        policy_name=policy_name,
+        old_version=old_version,
+        new_version=new_version,
+        old_file_path=old_file_path,
+        new_file_path=new_file_path,
+    )
+
+    return {
+        "policy_name": policy_name,
+        "old_version": old_version,
+        "new_version": new_version,
         "count": len(changes),
         "changes": changes,
     }
