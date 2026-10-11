@@ -132,3 +132,75 @@ def get_policy_changes(
 
     finally:
         connection.close()
+
+def save_policy_comparison(
+    policy_name: str,
+    old_version: str,
+    old_file_path: str,
+    old_effective_date: str | None,
+    new_version: str,
+    new_file_path: str,
+    new_effective_date: str | None,
+    changes: list[dict[str, str]],
+) -> int:
+    """Save both policy versions and their changes atomically."""
+    connection = get_connection()
+
+    try:
+        with connection:
+            connection.execute(
+                """
+                INSERT INTO policy_versions (
+                    policy_name, version, effective_date, file_path
+                )
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    policy_name,
+                    old_version,
+                    old_effective_date,
+                    old_file_path,
+                ),
+            )
+
+            connection.execute(
+                """
+                INSERT INTO policy_versions (
+                    policy_name, version, effective_date, file_path
+                )
+                VALUES (?, ?, ?, ?)
+                """,
+                (
+                    policy_name,
+                    new_version,
+                    new_effective_date,
+                    new_file_path,
+                ),
+            )
+
+            connection.executemany(
+                """
+                INSERT INTO policy_changes (
+                    policy_name, section, change_type,
+                    old_text, new_text, old_version, new_version
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                [
+                    (
+                        policy_name,
+                        change["section"],
+                        change["change_type"],
+                        change["old_text"],
+                        change["new_text"],
+                        old_version,
+                        new_version,
+                    )
+                    for change in changes
+                ],
+            )
+
+        return len(changes)
+
+    finally:
+        connection.close()
