@@ -17,11 +17,12 @@ def test_answer_policy_question_with_changes(monkeypatch):
     monkeypatch.setattr(
         qa_service,
         "retrieve_policy_evidence",
-        lambda policy_name: sample_changes,
+        lambda policy_name, question: sample_changes,
     )
 
     result = qa_service.answer_policy_question(
-        "Annual Leave Policy"
+        "Annual Leave Policy",
+        "How many annual leave days are allowed?",
     )
 
     assert "20 days" in result["answer"]
@@ -36,11 +37,12 @@ def test_answer_policy_question_without_changes(monkeypatch):
     monkeypatch.setattr(
         qa_service,
         "retrieve_policy_evidence",
-        lambda policy_name: [],
+        lambda policy_name, question: [],
     )
 
     result = qa_service.answer_policy_question(
-        "Unknown Policy"
+        "Unknown Policy",
+        "What changed?",
     )
 
     assert result["citations"] == []

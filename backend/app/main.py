@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from app.database.operations import get_policy_changes
 from app.services.policy_service import process_policy_versions
 from app.services.qa_service import answer_policy_question
@@ -68,6 +68,10 @@ def compare_policy_versions(
 @app.get("/policies/{policy_name}/ask")
 def ask_policy_question(
     policy_name: str,
+    question: str = Query(..., min_length=3),
 ):
     """Answer a question using saved policy changes."""
-    return answer_policy_question(policy_name)
+    return answer_policy_question(
+        policy_name=policy_name,
+        question=question,
+    )

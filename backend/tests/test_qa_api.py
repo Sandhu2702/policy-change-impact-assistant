@@ -1,7 +1,6 @@
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.services import qa_service
 from app import main
 
 
@@ -9,7 +8,7 @@ def test_ask_policy_api_returns_answer_and_citations(monkeypatch):
     monkeypatch.setattr(
         main,
         "answer_policy_question",
-        lambda policy_name: {
+        lambda policy_name, question: {
             "policy_name": policy_name,
             "answer": "Annual leave increased from 20 to 24 days.",
             "citations": [
@@ -25,7 +24,8 @@ def test_ask_policy_api_returns_answer_and_citations(monkeypatch):
     client = TestClient(app)
 
     response = client.get(
-        "/policies/Annual Leave Policy/ask"
+        "/policies/Annual Leave Policy/ask",
+        params={"question": "How many annual leave days are allowed?"},
     )
 
     assert response.status_code == 200

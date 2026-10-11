@@ -3,16 +3,34 @@ from app.database.operations import get_policy_changes
 
 def retrieve_policy_evidence(
     policy_name: str,
+    question: str,
 ) -> list[dict]:
-    """Retrieve saved changes to use as evidence for an answer."""
-    return get_policy_changes(policy_name=policy_name)
+    """Retrieve saved changes relevant to the user's question."""
+    changes = get_policy_changes(policy_name=policy_name)
+
+    question_words = set(question.lower().split())
+
+    relevant_changes = []
+
+    for change in changes:
+        searchable_text = " ".join([
+            change["section"] or "",
+            change["old_text"] or "",
+            change["new_text"] or "",
+        ]).lower()
+
+        if any(word in searchable_text for word in question_words):
+            relevant_changes.append(change)
+
+    return relevant_changes
 
 
 def answer_policy_question(
     policy_name: str,
+    question: str,
 ) -> dict:
     """Create a basic answer using saved policy changes."""
-    changes = retrieve_policy_evidence(policy_name)
+    changes = retrieve_policy_evidence(policy_name, question)
 
     if not changes:
         return {
