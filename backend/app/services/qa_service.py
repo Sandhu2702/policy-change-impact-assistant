@@ -8,7 +8,17 @@ def retrieve_policy_evidence(
     """Retrieve saved changes relevant to the user's question."""
     changes = get_policy_changes(policy_name=policy_name)
 
-    question_words = set(question.lower().split())
+    stop_words = {
+       "what", "is", "the", "how", "many", "are",
+       "a", "an", "in", "of", "to", "for", "and",
+       "does", "do", "was", "were", "with", "changed",
+    }
+
+    question_words = {
+       word.strip(".,?!:;()")
+       for word in question.lower().split()
+       if word.strip(".,?!:;()") not in stop_words
+    }
 
     relevant_changes = []
 
@@ -19,8 +29,17 @@ def retrieve_policy_evidence(
             change["new_text"] or "",
         ]).lower()
 
-        if any(word in searchable_text for word in question_words):
-            relevant_changes.append(change)
+        matched_words = [
+            word for word in question_words
+            if word in searchable_text
+        ]
+
+        if matched_words:
+            relevant_changes.append((len(matched_words), change))
+
+        relevant_changes.sort(key=lambda item: item[0], reverse=True)
+
+        return [change for _, change in relevant_changes]
 
     return relevant_changes
 
