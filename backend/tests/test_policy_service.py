@@ -105,14 +105,10 @@ def test_process_policy_versions_detects_and_saves_changes(
     assert len(saved_changes) == 2
 
 
-def test_duplicate_version_does_not_save_partial_comparison(
+def test_existing_version_is_reused_when_saving_comparison(
     monkeypatch,
     tmp_path,
 ):
-    import sqlite3
-
-    import pytest
-
     from app.database import operations
     from app.database.operations import save_policy_comparison
 
@@ -161,24 +157,25 @@ def test_duplicate_version_does_not_save_partial_comparison(
     """)
     connection.close()
 
-    with pytest.raises(sqlite3.IntegrityError):
-        save_policy_comparison(
-            policy_name="Annual Leave Policy",
-            old_version="v1",
-            old_file_path="v1.txt",
-            old_effective_date="2025-01-01",
-            new_version="v2",
-            new_file_path="v2.txt",
-            new_effective_date="2026-01-01",
-            changes=[
-                {
-                    "section": "Leave Carryover",
-                    "change_type": "ADD",
-                    "old_text": "",
-                    "new_text": "Carry over 5 days.",
-                }
-            ],
-        )
+    saved_count = save_policy_comparison(
+        policy_name="Annual Leave Policy",
+        old_version="v1",
+        old_file_path="v1.txt",
+        old_effective_date="2025-01-01",
+        new_version="v2",
+        new_file_path="v2.txt",
+        new_effective_date="2026-01-01",
+        changes=[
+            {
+                "section": "Leave Carryover",
+                "change_type": "ADD",
+                "old_text": "",
+                "new_text": "Carry over 5 days.",
+            }
+        ],
+    )
+
+    assert saved_count == 1
 
     connection = get_test_connection()
     try:
@@ -192,5 +189,6 @@ def test_duplicate_version_does_not_save_partial_comparison(
     finally:
         connection.close()
 
-    assert [row["version"] for row in versions] == ["v1"]
-    assert len(changes) == 0
+    assert [row["version"] for row in versions] == ["v1", "v2"]
+    assert len(changes) == 1
+    assert changes[0]["section"] == "Leave Carryover"

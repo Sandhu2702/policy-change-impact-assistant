@@ -1,3 +1,4 @@
+
 from app.database.connection import get_connection
 
 
@@ -30,6 +31,7 @@ def save_policy_version(
     finally:
         connection.close()
 
+
 def get_policy_versions(policy_name: str) -> list[dict]:
     """Retrieve all saved versions of a policy."""
     connection = get_connection()
@@ -49,6 +51,7 @@ def get_policy_versions(policy_name: str) -> list[dict]:
 
     finally:
         connection.close()
+
 
 def save_policy_changes(
     policy_name: str,
@@ -93,6 +96,7 @@ def save_policy_changes(
     finally:
         connection.close()
 
+
 def get_policy_changes(
     policy_name: str,
     old_version: str | None = None,
@@ -133,6 +137,7 @@ def get_policy_changes(
     finally:
         connection.close()
 
+
 def save_policy_comparison(
     policy_name: str,
     old_version: str,
@@ -143,46 +148,55 @@ def save_policy_comparison(
     new_effective_date: str | None,
     changes: list[dict[str, str]],
 ) -> int:
-    """Save both policy versions and their changes atomically."""
+    """Save policy versions and their changes atomically."""
     connection = get_connection()
 
     try:
         with connection:
-            connection.execute(
-                """
-                INSERT INTO policy_versions (
-                    policy_name, version, effective_date, file_path
-                )
-                VALUES (?, ?, ?, ?)
-                """,
-                (
-                    policy_name,
-                    old_version,
-                    old_effective_date,
-                    old_file_path,
-                ),
-            )
+            versions = [
+                (old_version, old_file_path, old_effective_date),
+                (new_version, new_file_path, new_effective_date),
+            ]
 
-            connection.execute(
-                """
-                INSERT INTO policy_versions (
-                    policy_name, version, effective_date, file_path
-                )
-                VALUES (?, ?, ?, ?)
-                """,
-                (
-                    policy_name,
-                    new_version,
-                    new_effective_date,
-                    new_file_path,
-                ),
-            )
+            for version, file_path, effective_date in versions:
+                existing = connection.execute(
+                    """
+                    SELECT id
+                    FROM policy_versions
+                    WHERE policy_name = ? AND version = ?
+                    """,
+                    (policy_name, version),
+                ).fetchone()
+
+                if existing is None:
+                    connection.execute(
+                        """
+                        INSERT INTO policy_versions (
+                            policy_name,
+                            version,
+                            effective_date,
+                            file_path
+                        )
+                        VALUES (?, ?, ?, ?)
+                        """,
+                        (
+                            policy_name,
+                            version,
+                            effective_date,
+                            file_path,
+                        ),
+                    )
 
             connection.executemany(
                 """
                 INSERT INTO policy_changes (
-                    policy_name, section, change_type,
-                    old_text, new_text, old_version, new_version
+                    policy_name,
+                    section,
+                    change_type,
+                    old_text,
+                    new_text,
+                    old_version,
+                    new_version
                 )
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """,
