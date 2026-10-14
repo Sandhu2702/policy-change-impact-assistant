@@ -57,60 +57,6 @@ def test_answer_policy_question_without_changes(monkeypatch):
     assert "could not find" in result["answer"].lower()
 
 
-def retrieve_policy_evidence(
-    policy_name: str,
-    question: str,
-) -> list[dict]:
-    """Retrieve saved changes relevant to the user's question."""
-    changes = get_policy_changes(policy_name=policy_name)
-
-    stop_words = {
-        "what", "is", "the", "how", "many", "are",
-        "a", "an", "in", "of", "to", "for", "and",
-        "does", "do", "was", "were", "with", "changed",
-        "can", "they", "their", "whether", "under",
-        "allowed", "whether",
-    }
-
-    question_words = {
-        word.strip(".,?!:;()")
-        for word in question.lower().split()
-        if word.strip(".,?!:;()") not in stop_words
-    }
-
-    relevant_changes = []
-
-    for change in changes:
-        searchable_text = " ".join([
-            change["section"] or "",
-            change["old_text"] or "",
-            change["new_text"] or "",
-        ]).lower()
-
-        searchable_words = set(searchable_text.split())
-
-        matched_words = question_words.intersection(searchable_words)
-
-        if matched_words:
-            relevant_changes.append((len(matched_words), change))
-
-    if not relevant_changes:
-        return []
-
-    relevant_changes.sort(
-        key=lambda item: item[0],
-        reverse=True,
-    )
-
-    highest_score = relevant_changes[0][0]
-
-    return [
-        change
-        for score, change in relevant_changes
-        if score == highest_score
-    ]
-
-
 def test_answer_policy_question_handles_quota_error(monkeypatch):
     from google.genai import errors
 
