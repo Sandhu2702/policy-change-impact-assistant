@@ -2,12 +2,23 @@ from fastapi import FastAPI, Query
 from app.database.operations import get_policy_changes
 from app.services.policy_service import process_policy_versions
 from app.services.qa_service import answer_policy_question
-
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Policy Change Impact Assistant",
     description="API for tracking and querying policy changes.",
     version="0.1.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
