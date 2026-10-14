@@ -109,3 +109,51 @@ def retrieve_policy_evidence(
         for score, change in relevant_changes
         if score == highest_score
     ]
+
+
+def test_answer_policy_question_handles_quota_error(monkeypatch):
+    from google.genai import errors
+
+    sample_changes = [
+        {
+            "policy_name": "Confidential Data Sharing Policy",
+            "section": "AI Tools and Public Platforms",
+            "change_type": "ADD",
+            "old_text": "",
+            "new_text": (
+                "Employees must not upload confidential company "
+                "information to public AI tools."
+            ),
+            "old_version": "v1",
+            "new_version": "v2",
+        }
+    ]
+
+    monkeypatch.setattr(
+        qa_service,
+        "retrieve_policy_evidence",
+        lambda policy_name, question: sample_changes,
+    )
+
+    def raise_quota_error(prompt):
+        raise errors.ClientError(
+            429,
+            {"error": {"message": "Quota exceeded"}},
+        )
+
+    monkeypatch.setattr(
+        qa_service,
+        "generate_answer",
+        raise_quota_error,
+    )
+
+    result = qa_service.answer_policy_question(
+        "Confidential Data Sharing Policy",
+        "Can employees upload confidential information to public AI tools?",
+    )
+
+    assert "usage limit" in result["answer"].lower()
+    assert len(result["citations"]) == 1
+    assert result["citations"][0]["section"] == (
+        "AI Tools and Public Platforms"
+    )

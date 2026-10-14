@@ -9,6 +9,8 @@ backend/venv/
 
 # Secrets
 .env
+.env.*
+!.env.example
 
 # Local databases
 *.db

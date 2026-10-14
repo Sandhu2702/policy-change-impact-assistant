@@ -1,5 +1,6 @@
 from app.database.operations import get_policy_changes
 from app.services.llm_service import generate_answer
+from google.genai import errors
 
 def retrieve_policy_evidence(
     policy_name: str,
@@ -93,7 +94,19 @@ Instructions:
 - Return only the answer, without creating citations.
 """
 
-    answer = generate_answer(prompt)
+    try:
+        answer = generate_answer(prompt)
+    except errors.APIError as exc:
+        if exc.code == 429:
+            answer = (
+                "The AI service has reached its usage limit. "
+                "Please try again later."
+            )
+        else:
+            answer = (
+                "The AI service is temporarily unavailable. "
+                "Please try again later."
+            )
 
     citations = [
         {
